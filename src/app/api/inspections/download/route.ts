@@ -29,10 +29,12 @@ export async function GET(request: NextRequest) {
     let whereClause = {};
 
     if (startDate && endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
       whereClause = {
         dateTime: {
           gte: new Date(startDate),
-          lte: new Date(endDate),
+          lte: end,
         },
       };
     }

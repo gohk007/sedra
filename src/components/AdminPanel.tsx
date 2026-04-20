@@ -1,5 +1,175 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+function DateRangePicker({
+  startDate,
+  endDate,
+  onChange,
+}: {
+  startDate: string;
+  endDate: string;
+  onChange: (start: string, end: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState<string | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const today = new Date();
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+  const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  const toStr = (y: number, m: number, d: number) =>
+    `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+
+  const todayStr = toStr(today.getFullYear(), today.getMonth(), today.getDate());
+  const isToday = (day: number) => toStr(viewYear, viewMonth, day) === todayStr;
+
+  const handleDay = (day: number) => {
+    const str = toStr(viewYear, viewMonth, day);
+    if (!startDate || (startDate && endDate)) {
+      onChange(str, "");
+    } else {
+      if (str < startDate) onChange(str, startDate);
+      else onChange(startDate, str);
+      setOpen(false);
+    }
+  };
+
+  const inRange = (day: number) => {
+    const str = toStr(viewYear, viewMonth, day);
+    const end = endDate || hovered || "";
+    if (!startDate || !end) return false;
+    const lo = startDate < end ? startDate : end;
+    const hi = startDate < end ? end : startDate;
+    return str > lo && str < hi;
+  };
+
+  const isStart = (day: number) => toStr(viewYear, viewMonth, day) === startDate;
+  const isEnd = (day: number) => toStr(viewYear, viewMonth, day) === endDate;
+
+  const label = startDate && endDate
+    ? `${startDate} → ${endDate}`
+    : startDate
+    ? `${startDate} → ...`
+    : "Select date range";
+
+  const clearRange = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onChange("", "");
+  };
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center gap-3 px-4 py-2.5 bg-stone-800 border border-stone-700 hover:border-stone-600 rounded-xl text-sm transition-colors"
+      >
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-4 h-4 text-stone-400 flex-shrink-0">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 2v2M14 2v2M3 8h14M5 4h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" />
+        </svg>
+        <span className={`flex-1 text-left ${startDate ? "text-stone-200" : "text-stone-500"}`}>{label}</span>
+        {(startDate || endDate) && (
+          <span onClick={clearRange} className="text-stone-500 hover:text-stone-300 ml-1 transition-colors">✕</span>
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute z-50 mt-2 bg-stone-900 border border-stone-700 rounded-2xl shadow-2xl shadow-black/40 p-4 w-72">
+          {/* Month navigation */}
+          <div className="flex items-center justify-between mb-3">
+            <button
+              type="button"
+              onClick={() => { if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); } else setViewMonth(m => m - 1); }}
+              className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-stone-800 text-stone-400 hover:text-white transition-colors"
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+            </button>
+            <span className="text-white text-sm font-semibold">{monthNames[viewMonth]} {viewYear}</span>
+            <button
+              type="button"
+              onClick={() => { if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); } else setViewMonth(m => m + 1); }}
+              className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-stone-800 text-stone-400 hover:text-white transition-colors"
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
+            </button>
+          </div>
+
+          {/* Day headers */}
+          <div className="grid grid-cols-7 mb-1">
+            {["Su","Mo","Tu","We","Th","Fr","Sa"].map(d => (
+              <div key={d} className="text-center text-xs text-stone-600 font-medium py-1">{d}</div>
+            ))}
+          </div>
+
+          {/* Days grid */}
+          <div className="grid grid-cols-7">
+            {Array.from({ length: firstDay }).map((_, i) => <div key={`e${i}`} />)}
+            {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day => {
+              const str = toStr(viewYear, viewMonth, day);
+              const start = isStart(day);
+              const end = isEnd(day);
+              const range = inRange(day);
+              const isTodayDay = isToday(day);
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => handleDay(day)}
+                  onMouseEnter={() => startDate && !endDate && setHovered(str)}
+                  onMouseLeave={() => setHovered(null)}
+                  className={`relative h-8 text-xs font-medium transition-colors
+                    ${start || end ? "bg-amber-500 text-stone-900 rounded-full z-10" : ""}
+                    ${range ? "bg-amber-500/15 text-amber-300 rounded-none" : ""}
+                    ${!start && !end && !range && isTodayDay ? "text-amber-400 ring-1 ring-amber-500/50 rounded-full" : ""}
+                    ${!start && !end && !range && !isTodayDay ? "text-stone-300 hover:bg-stone-800 rounded-full" : ""}
+                  `}
+                >
+                  {day}
+                </button>
+              );
+            })}
+          </div>
+
+          {startDate && !endDate && (
+            <p className="text-stone-500 text-xs text-center mt-3">Click a second date to complete range</p>
+          )}
+
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-stone-800">
+            <button
+              type="button"
+              onClick={() => { setViewYear(today.getFullYear()); setViewMonth(today.getMonth()); }}
+              className="text-xs text-stone-500 hover:text-amber-400 transition-colors"
+            >
+              Today
+            </button>
+            {(startDate || endDate) && (
+              <button
+                type="button"
+                onClick={() => { onChange("", ""); }}
+                className="text-xs text-stone-500 hover:text-red-400 transition-colors"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AdminPanel({
   activeTab = "all",
@@ -12,10 +182,6 @@ export default function AdminPanel({
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-
-  useEffect(() => {
-    fetchInspections();
-  }, []);
 
   const fetchInspections = async () => {
     try {
@@ -32,26 +198,36 @@ export default function AdminPanel({
     }
   };
 
+  useEffect(() => {
+    fetchInspections();
+  }, []);
+
   const handleDownloadCSV = async () => {
     try {
       let url = "/api/inspections/download";
-
       if (startDate && endDate) {
         url += `?startDate=${startDate}&endDate=${endDate}`;
       }
 
       const response = await fetch(url);
-      if (response.ok) {
-        const blob = await response.blob();
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = downloadUrl;
-        link.download = "inspections.csv";
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(downloadUrl);
+      const contentType = response.headers.get("content-type") || "";
+
+      if (!response.ok || !contentType.includes("text/csv")) {
+        const data = await response.json().catch(() => ({}));
+        alert(data.message || data.error || "No data found for the selected range.");
+        return;
       }
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      const suffix = startDate && endDate ? `_${startDate}_to_${endDate}` : "";
+      link.download = `inspections${suffix}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error("Failed to download CSV:", error);
     }
@@ -133,30 +309,13 @@ export default function AdminPanel({
         <h3 className="text-white font-semibold text-base mb-5">Download Data</h3>
 
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-stone-400 mb-1.5">
-                Start Date
-              </label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-3 py-2 bg-stone-800 border border-stone-700 text-stone-200 rounded-xl focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500/50 outline-none text-sm [color-scheme:dark]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-stone-400 mb-1.5">
-                End Date
-              </label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 bg-stone-800 border border-stone-700 text-stone-200 rounded-xl focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500/50 outline-none text-sm [color-scheme:dark]"
-              />
-            </div>
+          <div>
+            <label className="block text-xs font-medium text-stone-400 mb-1.5">Date Range</label>
+            <DateRangePicker
+              startDate={startDate}
+              endDate={endDate}
+              onChange={(s, e) => { setStartDate(s); setEndDate(e); }}
+            />
           </div>
 
           <button
