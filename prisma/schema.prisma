@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  phone         String     @unique
+  password      String
+  plainPassword String?
+  role          String     @default("user") // "admin" or "user"
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  inspections   Inspection[]
+}
+
+// Inspection form model
+model Inspection {
+  id                String   @id @default(cuid())
+  serialNumber      Int      @default(autoincrement())
+  dateTime          DateTime @default(now())
+  checInspectorName String
+  ececInspectorName String
+  villaType         String
+  villaNumber       Int
+  activityType      String
+  statusOfInspection String
+  remarks           String   @db.Text
+  department        String
+  
+  // File attachment
+  wirAttachmentUrl  String?
+  wirAttachmentName String?
+  
+  // User relationship
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([dateTime])
+}
