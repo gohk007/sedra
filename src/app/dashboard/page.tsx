@@ -83,6 +83,7 @@ export default function Dashboard() {
 
   const adminNavItems = [
     { id: "dashboard", label: "Overview", icon: "dashboard" },
+    { id: "form", label: "New Inspection", icon: "form" },
     { id: "all", label: "All Reports", icon: "all" },
     { id: "users", label: "Manage Users", icon: "users" },
   ];
@@ -97,15 +98,17 @@ export default function Dashboard() {
     users: "Manage Users",
   };
 
+  const handleFormSuccess = () => {
+    fetchData();
+    setActiveTab(isAdmin ? "all" : "reports");
+  };
+
   const handleNav = (id: string) => {
     setActiveTab(id);
     setSidebarOpen(false);
   };
 
-  const handleFormSuccess = () => {
-    fetchData();
-    setActiveTab("reports");
-  };
+
 
   const iconPaths: Record<string, string> = {
     dashboard: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
@@ -215,7 +218,7 @@ export default function Dashboard() {
               </p>
             </div>
           </div>
-          {!isAdmin && activeTab !== "form" && (
+          {activeTab !== "form" && (
             <button
               onClick={() => handleNav("form")}
               className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 font-semibold rounded-xl text-sm transition-all hover:shadow-md hover:shadow-amber-500/20"
@@ -229,7 +232,7 @@ export default function Dashboard() {
         </header>
 
         <main className="flex-1 p-6">
-          {activeTab === "form" && !isAdmin ? (
+          {activeTab === "form" ? (
             <InspectionForm onSuccess={handleFormSuccess} />
           ) : isAdmin && activeTab === "users" ? (
             <UsersPanel />
