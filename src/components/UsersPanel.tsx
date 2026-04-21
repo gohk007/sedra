@@ -326,9 +326,9 @@ export default function UsersPanel() {
 
       {/* Users Table */}
       <div className="bg-stone-900 border border-stone-800 rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-stone-800 flex items-center justify-between">
-          <h3 className="text-white font-semibold">All Accounts</h3>
-          <span className="text-stone-500 text-sm">{users.length} users</span>
+        <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-stone-800 flex items-center justify-between gap-2">
+          <h3 className="text-white font-semibold text-sm sm:text-base">All Accounts</h3>
+          <span className="text-stone-500 text-xs sm:text-sm">{users.length} users</span>
         </div>
 
         {loading ? (
@@ -339,12 +339,14 @@ export default function UsersPanel() {
         ) : users.length === 0 ? (
           <div className="text-center py-16 text-stone-500">No users found</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto scrollbar-thin">
+            <table className="w-full text-sm min-w-full">
               <thead>
                 <tr className="bg-stone-800/40">
                   {["Email", "Phone", "Password", "Role", "Reports", "Joined", "Actions"].map((h) => (
-                    <th key={h} className="px-4 py-3.5 text-left text-stone-500 text-xs font-medium uppercase tracking-wider whitespace-nowrap">{h}</th>
+                    <th key={h} className={`px-2 sm:px-4 py-2.5 sm:py-3.5 text-left text-stone-500 text-xs font-medium uppercase tracking-wider whitespace-nowrap ${
+                      (h === "Password" || h === "Reports" || h === "Joined") ? "hidden sm:table-cell" : ""
+                    }`}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -352,7 +354,7 @@ export default function UsersPanel() {
                 {users.map((u) => (
                   <tr key={u.id} className={`hover:bg-stone-800/20 transition-colors ${u.id === currentUser?.id ? "bg-amber-500/5" : ""}`}>
                     {/* Email */}
-                    <td className="px-4 py-4 whitespace-nowrap">
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2.5">
                         <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold ${u.role === "admin" ? "bg-amber-500/20 text-amber-400" : "bg-stone-700 text-stone-300"}`}>
                           {u.email[0].toUpperCase()}
@@ -366,9 +368,9 @@ export default function UsersPanel() {
                       </div>
                     </td>
                     {/* Phone */}
-                    <td className="px-4 py-4 text-stone-300 whitespace-nowrap">{u.phone}</td>
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-4 text-stone-300 whitespace-nowrap">{u.phone}</td>
                     {/* Password */}
-                    <td className="px-4 py-4 whitespace-nowrap">
+                    <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-4 whitespace-nowrap">
                       {u.plainPassword ? (
                         <div className="flex items-center gap-2">
                           <span className="text-stone-300 font-mono text-sm">
@@ -396,7 +398,7 @@ export default function UsersPanel() {
                       )}
                     </td>
                     {/* Role */}
-                    <td className="px-4 py-4 whitespace-nowrap">
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-4 whitespace-nowrap">
                       <span className={`px-2.5 py-1 rounded-lg border text-xs font-medium ${
                         u.role === "admin"
                           ? "bg-amber-500/15 text-amber-400 border-amber-500/20"
@@ -406,18 +408,18 @@ export default function UsersPanel() {
                       </span>
                     </td>
                     {/* Reports */}
-                    <td className="px-4 py-4 text-stone-400 whitespace-nowrap">
+                    <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-4 text-stone-400 whitespace-nowrap">
                       <span className="flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-500/60" />
                         {u._count.inspections}
                       </span>
                     </td>
                     {/* Joined */}
-                    <td className="px-4 py-4 text-stone-500 text-xs whitespace-nowrap">
+                    <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-4 text-stone-500 text-xs whitespace-nowrap">
                       {new Date(u.createdAt).toLocaleDateString()}
                     </td>
                     {/* Actions */}
-                    <td className="px-4 py-4 whitespace-nowrap">
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-4 whitespace-nowrap">
                       {u.id === currentUser?.id ? (
                         <span className="text-stone-700 text-xs">—</span>
                       ) : (

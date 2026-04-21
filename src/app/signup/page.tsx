@@ -114,7 +114,7 @@ export default function SignUp() {
       </div>
 
       {/* Right panel – form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
+      <div className="w-full lg:flex-1 flex items-center justify-center px-6 py-12 lg:px-6">
         <div className="w-full max-w-md animate-fadeInUp">
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-3 mb-10 justify-center">

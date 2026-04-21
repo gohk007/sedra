@@ -310,8 +310,8 @@ function UserView({
         </div>
 
         <div className="bg-stone-900 border border-stone-800 rounded-2xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-stone-800">
-            <h3 className="text-white font-semibold">Recent Submissions</h3>
+          <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-stone-800">
+            <h3 className="text-white font-semibold text-sm sm:text-base">Recent Submissions</h3>
           </div>
           {loading ? (
             <div className="flex items-center gap-3 justify-center py-12">
@@ -326,7 +326,7 @@ function UserView({
           ) : (
             <div className="divide-y divide-stone-800">
               {inspections.slice(0, 5).map((item) => (
-                <div key={item.id} className="flex items-center gap-4 px-6 py-4 hover:bg-stone-800/30 transition-colors">
+                <div key={item.id} className="flex items-center gap-2 sm:gap-4 px-3 sm:px-6 py-3 sm:py-4 hover:bg-stone-800/30 transition-colors">
                   <div className="w-9 h-9 bg-stone-800 rounded-xl flex items-center justify-center flex-shrink-0">
                     <span className="text-amber-400 text-xs font-bold font-mono">#{item.serialNumber}</span>
                   </div>
@@ -349,9 +349,9 @@ function UserView({
   return (
     <div className="space-y-5 animate-fadeInUp">
       <div className="bg-stone-900 border border-stone-800 rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-stone-800 flex items-center justify-between">
-          <h3 className="text-white font-semibold">My Inspection Reports</h3>
-          <span className="text-stone-500 text-sm">{inspections.length} total</span>
+        <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-stone-800 flex items-center justify-between gap-2">
+          <h3 className="text-white font-semibold text-sm sm:text-base">My Inspection Reports</h3>
+          <span className="text-stone-500 text-xs sm:text-sm">{inspections.length} total</span>
         </div>
         {loading ? (
           <div className="flex items-center gap-3 justify-center py-12">
@@ -364,32 +364,34 @@ function UserView({
             <p className="text-stone-600 text-sm mt-1">Submit your first inspection to see it here</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto scrollbar-thin">
+            <table className="w-full text-sm min-w-full">
               <thead>
                 <tr className="bg-stone-800/40">
                   {["#", "Date", "CHEC Inspector", "Villa", "Activity", "Status", "Dept"].map((h) => (
-                    <th key={h} className="px-4 py-3.5 text-left text-stone-500 text-xs font-medium uppercase tracking-wider whitespace-nowrap">{h}</th>
+                    <th key={h} className={`px-2 sm:px-4 py-2.5 sm:py-3.5 text-left text-stone-500 text-xs font-medium uppercase tracking-wider whitespace-nowrap ${
+                      (h === "CHEC Inspector" || h === "Activity" || h === "Dept") ? "hidden sm:table-cell" : ""
+                    }`}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-800">
                 {inspections.map((item) => (
                   <tr key={item.id} className="hover:bg-stone-800/30 transition-colors">
-                    <td className="px-4 py-4 text-amber-400 font-mono font-semibold whitespace-nowrap">#{item.serialNumber}</td>
-                    <td className="px-4 py-4 text-stone-300 whitespace-nowrap">{new Date(item.dateTime).toLocaleDateString()}</td>
-                    <td className="px-4 py-4 text-white font-medium whitespace-nowrap">{item.checInspectorName}</td>
-                    <td className="px-4 py-4 whitespace-nowrap">
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-4 text-amber-400 font-mono font-semibold whitespace-nowrap text-xs sm:text-sm">#{item.serialNumber}</td>
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-4 text-stone-300 whitespace-nowrap text-xs sm:text-sm">{new Date(item.dateTime).toLocaleDateString()}</td>
+                    <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-4 text-white font-medium whitespace-nowrap">{item.checInspectorName}</td>
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-4 whitespace-nowrap text-xs sm:text-sm">
                       <span className="text-white font-medium">#{item.villaNumber}</span>
                       <span className="text-stone-500 ml-1 text-xs">{item.villaType}</span>
                     </td>
-                    <td className="px-4 py-4 text-stone-400 whitespace-nowrap">{item.activityType}</td>
-                    <td className="px-4 py-4 whitespace-nowrap">
+                    <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-4 text-stone-400 whitespace-nowrap">{item.activityType}</td>
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-4 whitespace-nowrap">
                       <span className={`px-2.5 py-1 rounded-lg border text-xs font-medium ${statusColors[item.statusOfInspection] || "bg-stone-700 text-stone-300 border-stone-600"}`}>
                         {item.statusOfInspection}
                       </span>
                     </td>
-                    <td className="px-4 py-4 text-stone-400 whitespace-nowrap">{item.department}</td>
+                    <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-4 text-stone-400 whitespace-nowrap text-xs">{item.department}</td>
                   </tr>
                 ))}
               </tbody>

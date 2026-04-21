@@ -323,9 +323,9 @@ export default function AdminPanel({
 
         {/* Recent Submissions */}
         <div className="bg-stone-900 border border-stone-800 rounded-2xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-stone-800 flex items-center justify-between">
-            <h3 className="text-white font-semibold">Recent Submissions</h3>
-            <span className="text-stone-500 text-sm">{inspections.length} total</span>
+          <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-stone-800 flex items-center justify-between gap-2">
+            <h3 className="text-white font-semibold text-sm sm:text-base">Recent Submissions</h3>
+            <span className="text-stone-500 text-xs sm:text-sm">{inspections.length} total</span>
           </div>
           {loading ? (
             <div className="flex items-center gap-3 justify-center py-12">
@@ -339,7 +339,7 @@ export default function AdminPanel({
           ) : (
             <div className="divide-y divide-stone-800">
               {(inspections as any[]).slice(0, 8).map((item: any) => (
-                <div key={item.id} className="flex items-center gap-4 px-6 py-4 hover:bg-stone-800/30 transition-colors">
+                <div key={item.id} className="flex items-center gap-2 sm:gap-4 px-3 sm:px-6 py-3 sm:py-4 hover:bg-stone-800/30 transition-colors">
                   <div className="w-9 h-9 bg-stone-800 rounded-xl flex items-center justify-center flex-shrink-0">
                     <span className="text-amber-400 text-xs font-bold font-mono">#{item.serialNumber}</span>
                   </div>
@@ -430,9 +430,9 @@ export default function AdminPanel({
 
       {/* Table */}
       <div className="bg-stone-900 border border-stone-800 rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-stone-800 flex items-center justify-between">
-          <h3 className="text-white font-semibold">All Submissions</h3>
-          <span className="text-stone-500 text-sm">
+        <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-stone-800 flex items-center justify-between gap-2">
+          <h3 className="text-white font-semibold text-sm sm:text-base">All Submissions</h3>
+          <span className="text-stone-500 text-xs sm:text-sm">
             {filteredInspections.length}{hasFilters && inspections.length !== filteredInspections.length ? ` of ${inspections.length}` : ""} records
           </span>
         </div>
@@ -448,31 +448,33 @@ export default function AdminPanel({
             <p className="text-stone-600 text-sm mt-1">Try adjusting your filters</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto scrollbar-thin">
+            <table className="w-full text-sm min-w-full">
               <thead>
                 <tr className="border-b border-stone-800">
                   {["#", "Date", "CHEC Inspector", "ECEC Inspector", "Villa", "Activity", "Status", "Department", "Submitted By"].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
+                    <th key={h} className={`px-2 sm:px-4 py-2.5 sm:py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wide whitespace-nowrap ${
+                      (h === "CHEC Inspector" || h === "ECEC Inspector" || h === "Activity" || h === "Department" || h === "Submitted By") ? "hidden sm:table-cell" : ""
+                    }`}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-800">
                 {filteredInspections.map((inspection: any) => (
                   <tr key={inspection.id} className="hover:bg-stone-800/50 transition-colors">
-                    <td className="px-4 py-3 text-stone-300 font-medium">{inspection.serialNumber}</td>
-                    <td className="px-4 py-3 text-stone-400 whitespace-nowrap">{new Date(inspection.dateTime).toLocaleDateString("en-GB")}</td>
-                    <td className="px-4 py-3 text-stone-300 whitespace-nowrap">{inspection.checInspectorName}</td>
-                    <td className="px-4 py-3 text-stone-300 whitespace-nowrap">{inspection.ececInspectorName}</td>
-                    <td className="px-4 py-3 text-stone-400 whitespace-nowrap">{inspection.villaType} #{inspection.villaNumber}</td>
-                    <td className="px-4 py-3 text-stone-400 whitespace-nowrap">{inspection.activityType}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-stone-300 font-medium">{inspection.serialNumber}</td>
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap text-xs sm:text-sm">{new Date(inspection.dateTime).toLocaleDateString("en-GB")}</td>
+                    <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-300 whitespace-nowrap">{inspection.checInspectorName}</td>
+                    <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-300 whitespace-nowrap">{inspection.ececInspectorName}</td>
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap text-xs sm:text-sm">{inspection.villaType} #{inspection.villaNumber}</td>
+                    <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap">{inspection.activityType}</td>
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-3">
                       <span className={`px-2 py-1 rounded-lg text-xs font-medium ${statusColors[inspection.statusOfInspection] ?? "bg-stone-700 text-stone-300 border border-stone-600"}`}>
                         {inspection.statusOfInspection}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-stone-400 whitespace-nowrap">{inspection.department}</td>
-                    <td className="px-4 py-3 text-stone-400 whitespace-nowrap">{inspection.user?.email}</td>
+                    <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap">{inspection.department}</td>
+                    <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap text-xs">{inspection.user?.email}</td>
                   </tr>
                 ))}
               </tbody>
