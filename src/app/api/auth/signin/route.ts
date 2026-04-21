@@ -40,6 +40,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if user is disabled
+    if (user.isDisabled) {
+      return NextResponse.json(
+        { error: "Account is disabled. Please contact the administrator to enable your account." },
+        { status: 403 }
+      );
+    }
+
     // Verify password
     const isPasswordValid = await verifyPassword(password, user.password);
     if (!isPasswordValid) {

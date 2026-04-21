@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
       phone: true,
       role: true,
       plainPassword: true,
+      isDisabled: true,
       createdAt: true,
       _count: { select: { inspections: true } },
     },
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await hashPassword(password);
     const user = await prisma.user.create({
       data: { email, phone, password: hashedPassword, plainPassword: password, role },
-      select: { id: true, email: true, phone: true, role: true, plainPassword: true, createdAt: true },
+      select: { id: true, email: true, phone: true, role: true, plainPassword: true, isDisabled: true, createdAt: true },
     });
 
     return NextResponse.json(user, { status: 201 });

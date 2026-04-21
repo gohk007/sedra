@@ -8,6 +8,7 @@ interface UserRow {
   phone: string;
   role: string;
   plainPassword: string | null;
+  isDisabled: boolean;
   createdAt: string;
   _count: { inspections: number };
 }
@@ -20,6 +21,7 @@ export default function UsersPanel() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [togglingRole, setTogglingRole] = useState<string | null>(null);
+  const [togglingDisabled, setTogglingDisabled] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Add user form
@@ -92,6 +94,29 @@ export default function UsersPanel() {
       flash("error", "Role change failed");
     } finally {
       setTogglingRole(null);
+    }
+  };
+
+  const handleToggleDisabled = async (id: string, currentDisabled: boolean) => {
+    setTogglingDisabled(id);
+    const newStatus = !currentDisabled;
+    try {
+      const res = await fetch(`/api/users/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isDisabled: newStatus }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUsers((u) => u.map((x) => (x.id === id ? { ...x, isDisabled: newStatus } : x)));
+        flash("success", newStatus ? "User disabled" : "User enabled");
+      } else {
+        flash("error", data.error || "Status change failed");
+      }
+    } catch (e) {
+      flash("error", "Status change failed");
+    } finally {
+      setTogglingDisabled(null);
     }
   };
 
@@ -448,6 +473,27 @@ export default function UsersPanel() {
                               Remove
                             </button>
                           )}
+
+                          {/* Disable/Enable */}
+                          <button
+                            onClick={() => handleToggleDisabled(u.id, u.isDisabled)}
+                            disabled={togglingDisabled === u.id}
+                            title={u.isDisabled ? "Enable user" : "Disable user"}
+                            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                              u.isDisabled
+                                ? "border-green-500/30 text-green-400 hover:bg-green-500/10"
+                                : "border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
+                            }`}
+                          >
+                            {togglingDisabled === u.id ? (
+                              <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                              </svg>
+                            )}
+                            {u.isDisabled ? "Enable" : "Disable"}
+                          </button>
                         </div>
                       )}
                     </td>

@@ -46,22 +46,40 @@ export async function PATCH(
 
   if (id === auth.userId) {
     return NextResponse.json(
-      { error: "Cannot change your own role" },
+      { error: "Cannot modify your own account" },
       { status: 400 }
     );
   }
 
   const body = await request.json();
-  const { role } = body;
+  const { role, isDisabled } = body;
 
-  if (role !== "admin" && role !== "user") {
-    return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+  const updateData: any = {};
+
+  // Handle role update
+  if (role !== undefined) {
+    if (role !== "admin" && role !== "user") {
+      return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+    }
+    updateData.role = role;
+  }
+
+  // Handle disabled status update
+  if (isDisabled !== undefined) {
+    if (typeof isDisabled !== "boolean") {
+      return NextResponse.json({ error: "Invalid disabled status" }, { status: 400 });
+    }
+    updateData.isDisabled = isDisabled;
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
   }
 
   const user = await prisma.user.update({
     where: { id },
-    data: { role },
-    select: { id: true, email: true, role: true },
+    data: updateData,
+    select: { id: true, email: true, role: true, isDisabled: true },
   });
 
   return NextResponse.json(user);

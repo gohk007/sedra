@@ -18,6 +18,7 @@ model User {
   password      String
   plainPassword String?
   role          String     @default("user") // "admin" or "user"
+  isDisabled    Boolean    @default(false)
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
   inspections   Inspection[]
