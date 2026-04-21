@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { generateToken, verifyPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getClientIp, rateLimit } from "@/lib/rateLimit";
 
 const signinSchema = z.object({
   emailOrPhone: z.string(),
@@ -9,6 +10,15 @@ const signinSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 5 attempts per 15 minutes per IP
+  const ip = getClientIp(request);
+  if (!rateLimit(`signin:${ip}`, 5, 15 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: "Too many login attempts. Please try again in 15 minutes." },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await request.json();
 
@@ -22,10 +32,11 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Use same error for not found and wrong password to prevent user enumeration
     if (!user) {
       return NextResponse.json(
-        { error: "User not found. Please register first." },
-        { status: 404 }
+        { error: "Invalid credentials" },
+        { status: 401 }
       );
     }
 
@@ -33,7 +44,7 @@ export async function POST(request: NextRequest) {
     const isPasswordValid = await verifyPassword(password, user.password);
     if (!isPasswordValid) {
       return NextResponse.json(
-        { error: "Invalid password" },
+        { error: "Invalid credentials" },
         { status: 401 }
       );
     }
