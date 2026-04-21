@@ -127,7 +127,7 @@ export default function UsersPanel() {
   return (
     <div className="space-y-5 animate-fadeInUp">
       {/* Header row */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start sm:items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-white font-bold text-lg">User Management</h2>
           <p className="text-stone-500 text-sm mt-0.5">{users.length} registered users</p>
@@ -183,7 +183,7 @@ export default function UsersPanel() {
             <h3 className="text-white font-semibold">Add New User</h3>
             <p className="text-stone-500 text-xs mt-0.5">Create a new inspector or admin account</p>
           </div>
-          <form onSubmit={handleAddUser} className="p-6">
+          <form onSubmit={handleAddUser} className="p-4 sm:p-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-stone-300 text-sm font-medium mb-2">Email Address</label>

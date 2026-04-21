@@ -87,7 +87,7 @@ function DateRangePicker({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-2 bg-stone-900 border border-stone-700 rounded-2xl shadow-2xl shadow-black/40 p-4 w-72">
+        <div className="absolute z-50 mt-2 bg-stone-900 border border-stone-700 rounded-2xl shadow-2xl shadow-black/40 p-4 left-0 w-full sm:w-72">
           {/* Month navigation */}
           <div className="flex items-center justify-between mb-3">
             <button
@@ -266,12 +266,12 @@ export default function AdminPanel({
     Completed: "bg-green-500/15 text-green-400 border border-green-500/20",
     "In Progress": "bg-blue-500/15 text-blue-400 border border-blue-500/20",
     Pending: "bg-orange-500/15 text-orange-400 border border-orange-500/20",
-    Failed: "bg-red-500/15 text-red-400 border border-red-500/20",
+    Rejected: "bg-red-500/15 text-red-400 border border-red-500/20",
   };
 
   const checNames = Array.from(new Set(inspections.map((i: any) => i.checInspectorName))).filter(Boolean);
   const ececNames = Array.from(new Set(inspections.map((i: any) => i.ececInspectorName))).filter(Boolean);
-  const statuses = ["Completed", "In Progress", "Pending", "Failed"];
+  const statuses = ["Completed", "In Progress", "Pending", "Rejected"];
 
   const filteredInspections = inspections.filter((i: any) => {
     const q = searchQuery.toLowerCase();
@@ -298,7 +298,7 @@ export default function AdminPanel({
   const selectClass = "px-3 py-2 bg-stone-800 border border-stone-700 text-stone-200 rounded-xl text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all appearance-none cursor-pointer";
 
   if (activeTab === "dashboard") {
-    const failed = inspections.filter((i: any) => i.statusOfInspection === "Failed").length;
+    const failed = inspections.filter((i: any) => i.statusOfInspection === "Rejected").length;
     return (
       <div className="space-y-6 animate-fadeInUp">
         {/* Stats */}
@@ -307,7 +307,7 @@ export default function AdminPanel({
             { label: "Total Reports", value: stats.total, bg: "bg-amber-500/15", ic: "text-amber-400", path: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
             { label: "Completed", value: stats.completed, bg: "bg-green-500/15", ic: "text-green-400", path: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" },
             { label: "In Progress / Pending", value: stats.pending, bg: "bg-blue-500/15", ic: "text-blue-400", path: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
-            { label: "Failed", value: failed, bg: "bg-red-500/15", ic: "text-red-400", path: "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" },
+            { label: "Rejected", value: failed, bg: "bg-red-500/15", ic: "text-red-400", path: "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" },
           ].map((s) => (
             <div key={s.label} className="bg-stone-900 border border-stone-800 rounded-2xl p-5">
               <div className={`w-10 h-10 ${s.bg} rounded-xl flex items-center justify-center mb-3`}>
@@ -398,7 +398,7 @@ export default function AdminPanel({
 
         {/* Date range + actions */}
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 w-full">
             <label className="block text-xs font-medium text-stone-400 mb-1.5">Date Range</label>
             <DateRangePicker
               startDate={startDate}
@@ -406,20 +406,20 @@ export default function AdminPanel({
               onChange={(s, e) => { setStartDate(s); setEndDate(e); }}
             />
           </div>
-          <div className="flex gap-2 flex-shrink-0">
+          <div className="flex gap-2 w-full sm:w-auto flex-shrink-0">
             {hasFilters && (
               <button
                 onClick={() => { setSearchQuery(""); setFilterChec(""); setFilterEcec(""); setFilterStatus(""); setStartDate(""); setEndDate(""); }}
-                className="px-4 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-white border border-stone-700 rounded-xl text-sm transition-colors"
+                className="flex-1 sm:flex-none px-4 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-white border border-stone-700 rounded-xl text-sm transition-colors text-center"
               >
                 Clear All
               </button>
             )}
             <button
               onClick={handleDownloadCSV}
-              className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-stone-900 font-semibold rounded-xl text-sm transition-colors"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-stone-900 font-semibold rounded-xl text-sm transition-colors"
             >
-              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 flex-shrink-0">
                 <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
               Download CSV
