@@ -178,10 +178,14 @@ export default function AdminPanel({
   activeTab?: string;
   stats?: { total: number; completed: number; pending: number };
 }) {
-  const [inspections, setInspections] = useState([]);
+  const [inspections, setInspections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterChec, setFilterChec] = useState("");
+  const [filterEcec, setFilterEcec] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
 
   const fetchInspections = async () => {
     try {
@@ -218,7 +222,32 @@ export default function AdminPanel({
         return;
       }
 
-      const blob = await response.blob();
+      // Filter the CSV client-side from filtered rows
+      const toFilter = filteredInspections;
+      if (toFilter.length === 0) {
+        alert("No data matches the current filters.");
+        return;
+      }
+
+      const rows = [
+        ["Serial #","Date","CHEC Inspector","ECEC Inspector","Villa Type","Villa Number","Activity Type","Status","Remarks","Department","Submitted By (Email)","Submitted By (Phone)"].join(","),
+        ...toFilter.map((r: any) => [
+          r.serialNumber,
+          new Date(r.dateTime).toLocaleDateString("en-GB"),
+          r.checInspectorName,
+          r.ececInspectorName,
+          r.villaType,
+          r.villaNumber,
+          r.activityType,
+          r.statusOfInspection,
+          `"${(r.remarks || "").replace(/"/g, '""')}"`,
+          r.department,
+          r.user?.email ?? "",
+          r.user?.phone ?? "",
+        ].join(","))
+      ].join("\n");
+
+      const blob = new Blob([rows], { type: "text/csv" });
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = downloadUrl;
@@ -239,6 +268,34 @@ export default function AdminPanel({
     Pending: "bg-orange-500/15 text-orange-400 border border-orange-500/20",
     Failed: "bg-red-500/15 text-red-400 border border-red-500/20",
   };
+
+  const checNames = Array.from(new Set(inspections.map((i: any) => i.checInspectorName))).filter(Boolean);
+  const ececNames = Array.from(new Set(inspections.map((i: any) => i.ececInspectorName))).filter(Boolean);
+  const statuses = ["Completed", "In Progress", "Pending", "Failed"];
+
+  const filteredInspections = inspections.filter((i: any) => {
+    const q = searchQuery.toLowerCase();
+    const matchSearch = !q || [
+      i.checInspectorName, i.ececInspectorName, i.villaType,
+      String(i.villaNumber), i.activityType, i.statusOfInspection,
+      i.department, i.remarks, i.user?.email,
+    ].some((v) => v?.toLowerCase().includes(q));
+    const matchChec = !filterChec || i.checInspectorName === filterChec;
+    const matchEcec = !filterEcec || i.ececInspectorName === filterEcec;
+    const matchStatus = !filterStatus || i.statusOfInspection === filterStatus;
+    const matchDate = (() => {
+      if (!startDate && !endDate) return true;
+      const d = new Date(i.dateTime).toISOString().slice(0, 10);
+      if (startDate && endDate) return d >= startDate && d <= endDate;
+      if (startDate) return d >= startDate;
+      return true;
+    })();
+    return matchSearch && matchChec && matchEcec && matchStatus && matchDate;
+  });
+
+  const hasFilters = searchQuery || filterChec || filterEcec || filterStatus || startDate;
+
+  const selectClass = "px-3 py-2 bg-stone-800 border border-stone-700 text-stone-200 rounded-xl text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all appearance-none cursor-pointer";
 
   if (activeTab === "dashboard") {
     const failed = inspections.filter((i: any) => i.statusOfInspection === "Failed").length;
@@ -303,13 +360,45 @@ export default function AdminPanel({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Download Section */}
-      <div className="bg-stone-900 border border-stone-800 rounded-2xl p-6">
-        <h3 className="text-white font-semibold text-base mb-5">Download Data</h3>
+    <div className="space-y-5">
+      {/* Filters + Download */}
+      <div className="bg-stone-900 border border-stone-800 rounded-2xl p-5 space-y-4">
+        {/* Search */}
+        <div className="relative">
+          <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-stone-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+            <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search by name, villa, activity, department, email…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-stone-800 border border-stone-700 text-white placeholder-stone-500 rounded-xl text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all"
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-300 transition-colors text-xs">✕</button>
+          )}
+        </div>
 
-        <div className="space-y-4">
-          <div>
+        {/* Dropdowns row */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <select value={filterChec} onChange={(e) => setFilterChec(e.target.value)} className={selectClass}>
+            <option value="">All CHEC Inspectors</option>
+            {checNames.map((n: string) => <option key={n} value={n}>{n}</option>)}
+          </select>
+          <select value={filterEcec} onChange={(e) => setFilterEcec(e.target.value)} className={selectClass}>
+            <option value="">All ECEC Inspectors</option>
+            {ececNames.map((n: string) => <option key={n} value={n}>{n}</option>)}
+          </select>
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className={selectClass}>
+            <option value="">All Statuses</option>
+            {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </div>
+
+        {/* Date range + actions */}
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+          <div className="flex-1 min-w-0">
             <label className="block text-xs font-medium text-stone-400 mb-1.5">Date Range</label>
             <DateRangePicker
               startDate={startDate}
@@ -317,57 +406,73 @@ export default function AdminPanel({
               onChange={(s, e) => { setStartDate(s); setEndDate(e); }}
             />
           </div>
-
-          <button
-            onClick={handleDownloadCSV}
-            className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 font-semibold rounded-xl text-sm transition-colors"
-          >
-            Download as CSV
-          </button>
+          <div className="flex gap-2 flex-shrink-0">
+            {hasFilters && (
+              <button
+                onClick={() => { setSearchQuery(""); setFilterChec(""); setFilterEcec(""); setFilterStatus(""); setStartDate(""); setEndDate(""); }}
+                className="px-4 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-white border border-stone-700 rounded-xl text-sm transition-colors"
+              >
+                Clear All
+              </button>
+            )}
+            <button
+              onClick={handleDownloadCSV}
+              className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-stone-900 font-semibold rounded-xl text-sm transition-colors"
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+              Download CSV
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* All Submissions Table */}
-      <div className="bg-stone-900 border border-stone-800 rounded-2xl p-6">
-        <h3 className="text-white font-semibold text-base mb-5">All Submissions</h3>
+      {/* Table */}
+      <div className="bg-stone-900 border border-stone-800 rounded-2xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-stone-800 flex items-center justify-between">
+          <h3 className="text-white font-semibold">All Submissions</h3>
+          <span className="text-stone-500 text-sm">
+            {filteredInspections.length}{hasFilters && inspections.length !== filteredInspections.length ? ` of ${inspections.length}` : ""} records
+          </span>
+        </div>
 
         {loading ? (
-          <div className="flex items-center gap-2 py-6">
+          <div className="flex items-center gap-2 py-10 justify-center">
             <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
             <p className="text-stone-500 text-sm">Loading submissions...</p>
           </div>
-        ) : inspections.length === 0 ? (
-          <p className="text-stone-500 text-sm py-6 text-center">No submissions yet.</p>
+        ) : filteredInspections.length === 0 ? (
+          <div className="py-14 text-center">
+            <p className="text-stone-400 font-medium">No results found</p>
+            <p className="text-stone-600 text-sm mt-1">Try adjusting your filters</p>
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-stone-800">
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wide">Serial #</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wide">Date</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wide">CHEC Inspector</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wide">Villa Type</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wide">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wide">Department</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wide">Submitted By</th>
+                  {["#", "Date", "CHEC Inspector", "ECEC Inspector", "Villa", "Activity", "Status", "Department", "Submitted By"].map((h) => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-800">
-                {inspections.map((inspection: any) => (
+                {filteredInspections.map((inspection: any) => (
                   <tr key={inspection.id} className="hover:bg-stone-800/50 transition-colors">
                     <td className="px-4 py-3 text-stone-300 font-medium">{inspection.serialNumber}</td>
-                    <td className="px-4 py-3 text-stone-400">
-                      {new Date(inspection.dateTime).toLocaleDateString("en-GB")}
-                    </td>
-                    <td className="px-4 py-3 text-stone-300">{inspection.checInspectorName}</td>
-                    <td className="px-4 py-3 text-stone-400">{inspection.villaType}</td>
+                    <td className="px-4 py-3 text-stone-400 whitespace-nowrap">{new Date(inspection.dateTime).toLocaleDateString("en-GB")}</td>
+                    <td className="px-4 py-3 text-stone-300 whitespace-nowrap">{inspection.checInspectorName}</td>
+                    <td className="px-4 py-3 text-stone-300 whitespace-nowrap">{inspection.ececInspectorName}</td>
+                    <td className="px-4 py-3 text-stone-400 whitespace-nowrap">{inspection.villaType} #{inspection.villaNumber}</td>
+                    <td className="px-4 py-3 text-stone-400 whitespace-nowrap">{inspection.activityType}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-1 rounded-lg text-xs font-medium ${statusColors[inspection.statusOfInspection] ?? "bg-stone-700 text-stone-300 border border-stone-600"}`}>
                         {inspection.statusOfInspection}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-stone-400">{inspection.department}</td>
-                    <td className="px-4 py-3 text-stone-400">{inspection.user.email}</td>
+                    <td className="px-4 py-3 text-stone-400 whitespace-nowrap">{inspection.department}</td>
+                    <td className="px-4 py-3 text-stone-400 whitespace-nowrap">{inspection.user?.email}</td>
                   </tr>
                 ))}
               </tbody>
