@@ -14,7 +14,6 @@ const STATUS_OPTIONS = [
 
 const DEPARTMENTS = ["Civil", "Mechanical", "Electrical", "Architecture", "Finishing", "Landscaping", "Infrastructure", "Other"];
 const ACTIVITY_TYPES = ["Foundation", "Structure", "Roofing", "Electrical", "Plumbing", "Tiling", "Painting", "Handover", "Other"];
-const VILLA_TYPES = ["DP4", "DP5", "C10", "VL"];
 
 const SectionTitle = ({ label }: { label: string }) => (
   <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-4">{label}</h3>
@@ -181,16 +180,13 @@ export default function InspectionForm({ onSuccess }: InspectionFormProps) {
             <label className="block text-stone-300 text-sm font-medium mb-2">
               Villa Type <span className="text-amber-500">*</span>
             </label>
-            <select
+            <input
+              type="text"
+              placeholder="e.g. DP4, DP5, C10, VL"
               value={form.villaType}
               onChange={(e) => set("villaType", e.target.value)}
-              className="w-full px-4 py-3 bg-stone-800 border border-stone-700 text-white rounded-xl focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all text-sm appearance-none cursor-pointer"
-            >
-              <option value="" disabled>Select villa type</option>
-              {VILLA_TYPES.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+              className="w-full px-4 py-3 bg-stone-800 border border-stone-700 text-white placeholder-stone-500 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all text-sm"
+            />
           </div>
           <div className="max-w-xs">
             <label className="block text-stone-300 text-sm font-medium mb-2">
