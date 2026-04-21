@@ -24,7 +24,7 @@ const statusColors: Record<string, string> = {
   Completed: "bg-green-500/15 text-green-400 border-green-500/20",
   "In Progress": "bg-blue-500/15 text-blue-400 border-blue-500/20",
   Pending: "bg-orange-500/15 text-orange-400 border-orange-500/20",
-  Failed: "bg-red-500/15 text-red-400 border-red-500/20",
+  Rejected: "bg-red-500/15 text-red-400 border-red-500/20",
 };
 
 export default function Dashboard() {
@@ -201,7 +201,7 @@ export default function Dashboard() {
 
       {/* Main content */}
       <div className="flex-1 lg:pl-64 flex flex-col min-h-screen">
-        <header className="sticky top-0 z-20 bg-stone-950/90 backdrop-blur-sm border-b border-stone-800 px-6 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-20 bg-stone-950/90 backdrop-blur-sm border-b border-stone-800 px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -221,17 +221,17 @@ export default function Dashboard() {
           {activeTab !== "form" && (
             <button
               onClick={() => handleNav("form")}
-              className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 font-semibold rounded-xl text-sm transition-all hover:shadow-md hover:shadow-amber-500/20"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-amber-500 hover:bg-amber-400 text-stone-900 font-semibold rounded-xl text-sm transition-all hover:shadow-md hover:shadow-amber-500/20"
             >
-              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 flex-shrink-0">
                 <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
               </svg>
-              New Report
+              <span className="hidden sm:inline">New Report</span>
             </button>
           )}
         </header>
 
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-3 sm:p-6">
           {activeTab === "form" ? (
             <InspectionForm onSuccess={handleFormSuccess} />
           ) : isAdmin && activeTab === "users" ? (

@@ -9,7 +9,7 @@ const STATUS_OPTIONS = [
   { value: "Completed", color: "border-green-500 bg-green-500/15 text-green-400", dot: "bg-green-400" },
   { value: "In Progress", color: "border-blue-500 bg-blue-500/15 text-blue-400", dot: "bg-blue-400" },
   { value: "Pending", color: "border-orange-500 bg-orange-500/15 text-orange-400", dot: "bg-orange-400" },
-  { value: "Failed", color: "border-red-500 bg-red-500/15 text-red-400", dot: "bg-red-400" },
+  { value: "Rejected", color: "border-red-500 bg-red-500/15 text-red-400", dot: "bg-red-400" },
 ];
 
 const DEPARTMENTS = ["Civil", "Mechanical", "Electrical", "Architecture", "Finishing", "Landscaping", "Infrastructure", "Other"];
@@ -143,7 +143,7 @@ export default function InspectionForm({ onSuccess }: InspectionFormProps) {
     <div className="max-w-3xl mx-auto animate-fadeInUp space-y-5">
 
       {/* Inspector Details */}
-      <div className="bg-stone-900 border border-stone-800 rounded-2xl p-6">
+      <div className="bg-stone-900 border border-stone-800 rounded-2xl p-4 sm:p-6">
         <SectionTitle label="Inspector Details" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -174,7 +174,7 @@ export default function InspectionForm({ onSuccess }: InspectionFormProps) {
       </div>
 
       {/* Villa Info */}
-      <div className="bg-stone-900 border border-stone-800 rounded-2xl p-6">
+      <div className="bg-stone-900 border border-stone-800 rounded-2xl p-4 sm:p-6">
         <SectionTitle label="Villa Info" />
         <div className="space-y-4">
           <div>
@@ -208,7 +208,7 @@ export default function InspectionForm({ onSuccess }: InspectionFormProps) {
       </div>
 
       {/* Inspection Details */}
-      <div className="bg-stone-900 border border-stone-800 rounded-2xl p-6">
+      <div className="bg-stone-900 border border-stone-800 rounded-2xl p-4 sm:p-6">
         <SectionTitle label="Inspection Details" />
         <div className="space-y-5">
           <div>
@@ -290,7 +290,7 @@ export default function InspectionForm({ onSuccess }: InspectionFormProps) {
       </div>
 
       {/* Remarks & File */}
-      <div className="bg-stone-900 border border-stone-800 rounded-2xl p-6">
+      <div className="bg-stone-900 border border-stone-800 rounded-2xl p-4 sm:p-6">
         <SectionTitle label="Remarks & Attachment" />
         <div className="space-y-4">
           <div>
