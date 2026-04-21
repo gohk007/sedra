@@ -32,6 +32,7 @@ export default function InspectionForm({ onSuccess }: InspectionFormProps) {
     villaType: "",
     villaNumber: "",
     activityType: "",
+    activityTypeOther: "",
     statusOfInspection: "",
     department: "",
     departmentOther: "",
@@ -56,6 +57,10 @@ export default function InspectionForm({ onSuccess }: InspectionFormProps) {
       setError("Activity type, status, and department are required");
       return;
     }
+    if (form.activityType === "Other" && !form.activityTypeOther.trim()) {
+      setError("Please specify the activity type");
+      return;
+    }
     if (form.department === "Other" && !form.departmentOther.trim()) {
       setError("Please specify the department");
       return;
@@ -76,7 +81,7 @@ export default function InspectionForm({ onSuccess }: InspectionFormProps) {
           ececInspectorName: form.ececInspectorName,
           villaType: form.villaType,
           villaNumber: villaNum,
-          activityType: form.activityType,
+          activityType: form.activityType === "Other" ? form.activityTypeOther : form.activityType,
           statusOfInspection: form.statusOfInspection,
           department: form.department === "Other" ? form.departmentOther : form.department,
           remarks: form.remarks,
@@ -103,6 +108,7 @@ export default function InspectionForm({ onSuccess }: InspectionFormProps) {
       villaType: "",
       villaNumber: "",
       activityType: "",
+      activityTypeOther: "",
       statusOfInspection: "",
       department: "",
       departmentOther: "",
@@ -227,6 +233,15 @@ export default function InspectionForm({ onSuccess }: InspectionFormProps) {
                 </button>
               ))}
             </div>
+            {form.activityType === "Other" && (
+              <input
+                type="text"
+                placeholder="Please specify the activity type"
+                value={form.activityTypeOther}
+                onChange={(e) => set("activityTypeOther", e.target.value)}
+                className="w-full mt-3 px-4 py-3 bg-stone-800 border border-stone-700 text-white placeholder-stone-500 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all text-sm"
+              />
+            )}
           </div>
 
           <div>
