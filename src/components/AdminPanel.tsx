@@ -174,9 +174,11 @@ function DateRangePicker({
 export default function AdminPanel({
   activeTab = "all",
   stats = { total: 0, completed: 0, pending: 0 },
+  onEditInspection,
 }: {
   activeTab?: string;
   stats?: { total: number; completed: number; pending: number };
+  onEditInspection?: (inspection: any) => void;
 }) {
   const [inspections, setInspections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -454,7 +456,7 @@ export default function AdminPanel({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-stone-800">
-                  {["#", "Date", "CHEC Inspector", "ECEC Inspector", "Villa", "Activity", "Status", "Department", "Decision", "Notes", "Submitted By"].map((h) => (
+                  {["#", "Date", "CHEC Inspector", "ECEC Inspector", "Villa", "Activity", "Status", "Department", "Decision", "Notes", "Submitted By", "Action"].map((h) => (
                     <th key={h} className={`px-2 sm:px-4 py-2.5 sm:py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wide whitespace-nowrap ${
                       (h === "CHEC Inspector" || h === "ECEC Inspector" || h === "Activity" || h === "Department" || h === "Submitted By") ? "hidden sm:table-cell" : ""
                     }`}>{h}</th>
@@ -505,6 +507,14 @@ export default function AdminPanel({
                       )}
                     </td>
                     <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap text-xs">{inspection.user?.email}</td>
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-xs whitespace-nowrap">
+                      <button
+                        onClick={() => onEditInspection?.(inspection)}
+                        className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 rounded-lg transition-colors text-xs font-medium"
+                      >
+                        Edit
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

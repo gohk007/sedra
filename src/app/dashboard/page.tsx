@@ -37,6 +37,7 @@ export default function Dashboard() {
   const [dataLoading, setDataLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
+  const [editingInspection, setEditingInspection] = useState<Inspection | null>(null);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) router.push("/signin");
@@ -104,11 +105,18 @@ export default function Dashboard() {
   const handleFormSuccess = () => {
     fetchData();
     setActiveTab(isAdmin ? "all" : "reports");
+    setEditingInspection(null);
   };
 
   const handleNav = (id: string) => {
     setActiveTab(id);
+    setEditingInspection(null);
     setSidebarOpen(false);
+  };
+
+  const handleEditInspection = (inspection: Inspection) => {
+    setEditingInspection(inspection);
+    setActiveTab("form");
   };
 
 
@@ -252,11 +260,18 @@ export default function Dashboard() {
 
         <main className="flex-1 p-3 sm:p-6 overflow-x-hidden w-full">
           {activeTab === "form" ? (
-            <InspectionForm onSuccess={handleFormSuccess} />
+            <InspectionForm 
+              onSuccess={handleFormSuccess}
+              {...(editingInspection && { inspectionData: editingInspection })}
+            />
           ) : isAdmin && activeTab === "users" ? (
             <UsersPanel />
           ) : isAdmin ? (
-            <AdminPanel activeTab={activeTab} stats={stats} />
+            <AdminPanel 
+              activeTab={activeTab} 
+              stats={stats}
+              onEditInspection={handleEditInspection}
+            />
           ) : (
             <UserView
               activeTab={activeTab}
@@ -264,6 +279,7 @@ export default function Dashboard() {
               loading={dataLoading}
               stats={stats}
               onNewReport={() => handleNav("form")}
+              onEditInspection={handleEditInspection}
             />
           )}
         </main>
@@ -278,12 +294,14 @@ function UserView({
   loading,
   stats,
   onNewReport,
+  onEditInspection,
 }: {
   activeTab: string;
   inspections: Inspection[];
   loading: boolean;
   stats: { total: number; completed: number; pending: number };
   onNewReport: () => void;
+  onEditInspection?: (inspection: Inspection) => void;
 }) {
   if (activeTab === "dashboard") {
     return (
@@ -387,7 +405,7 @@ function UserView({
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-stone-800/40">
-                  {["#", "Date", "CHEC Inspector", "Villa", "Activity", "Status", "Decision", "Notes", "Dept"].map((h) => (
+                  {["#", "Date", "CHEC Inspector", "Villa", "Activity", "Status", "Decision", "Notes", "Dept", "Action"].map((h) => (
                     <th key={h} className={`px-2 sm:px-4 py-2.5 sm:py-3.5 text-left text-stone-500 text-xs font-medium uppercase tracking-wider whitespace-nowrap ${
                       (h === "CHEC Inspector" || h === "Activity" || h === "Dept") ? "hidden sm:table-cell" : ""
                     }`}>{h}</th>
@@ -439,6 +457,14 @@ function UserView({
                       )}
                     </td>
                     <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-4 text-stone-400 whitespace-nowrap text-xs">{item.department}</td>
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-4 text-xs whitespace-nowrap">
+                      <button
+                        onClick={() => onEditInspection?.(item)}
+                        className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 rounded-lg transition-colors text-xs font-medium"
+                      >
+                        Edit
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -1,8 +1,21 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface InspectionFormProps {
   onSuccess?: () => void;
+  inspectionData?: {
+    id: string;
+    checInspectorName: string;
+    ececInspectorName: string;
+    villaType: string;
+    villaNumber: number;
+    activityType: string;
+    statusOfInspection: string;
+    remarks: string;
+    department: string;
+    engineerComments?: string;
+    engineerDecision?: string;
+  };
 }
 
 const STATUS_OPTIONS = [
@@ -19,28 +32,37 @@ const SectionTitle = ({ label }: { label: string }) => (
   <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-4">{label}</h3>
 );
 
-export default function InspectionForm({ onSuccess }: InspectionFormProps) {
+export default function InspectionForm({ onSuccess, inspectionData }: InspectionFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
+  const isEditing = !!inspectionData;
 
-  const [form, setForm] = useState({
-    checInspectorName: "",
-    ececInspectorName: "",
-    villaType: "",
-    villaNumber: "",
-    activityType: "",
+  const initialFormState = {
+    checInspectorName: inspectionData?.checInspectorName || "",
+    ececInspectorName: inspectionData?.ececInspectorName || "",
+    villaType: inspectionData?.villaType || "",
+    villaNumber: inspectionData?.villaNumber?.toString() || "",
+    activityType: inspectionData?.activityType || "",
     activityTypeOther: "",
-    statusOfInspection: "",
-    department: "",
+    statusOfInspection: inspectionData?.statusOfInspection || "",
+    department: inspectionData?.department || "",
     departmentOther: "",
-    remarks: "",
-    engineerComments: "",
-    engineerDecision: "",
+    remarks: inspectionData?.remarks || "",
+    engineerComments: inspectionData?.engineerComments || "",
+    engineerDecision: inspectionData?.engineerDecision || "",
     wirFile: null as File | null,
-  });
+  };
+
+  const [form, setForm] = useState(initialFormState);
+
+  useEffect(() => {
+    if (inspectionData) {
+      setForm(initialFormState);
+    }
+  }, [inspectionData?.id]);
 
   const set = (key: string, value: string | File | null) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -75,22 +97,28 @@ export default function InspectionForm({ onSuccess }: InspectionFormProps) {
         setSubmitting(false);
         return;
       }
-      const res = await fetch("/api/inspections", {
-        method: "POST",
+      const payload = {
+        checInspectorName: form.checInspectorName,
+        ececInspectorName: form.ececInspectorName,
+        villaType: form.villaType,
+        villaNumber: villaNum,
+        activityType: form.activityType === "Other" ? form.activityTypeOther : form.activityType,
+        statusOfInspection: form.statusOfInspection,
+        department: form.department === "Other" ? form.departmentOther : form.department,
+        remarks: form.remarks,
+        engineerComments: form.engineerComments,
+        engineerDecision: form.engineerDecision,
+      };
+
+      const url = isEditing ? `/api/inspections?id=${inspectionData?.id}` : "/api/inspections";
+      const method = isEditing ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          checInspectorName: form.checInspectorName,
-          ececInspectorName: form.ececInspectorName,
-          villaType: form.villaType,
-          villaNumber: villaNum,
-          activityType: form.activityType === "Other" ? form.activityTypeOther : form.activityType,
-          statusOfInspection: form.statusOfInspection,
-          department: form.department === "Other" ? form.departmentOther : form.department,
-          remarks: form.remarks,
-          engineerComments: form.engineerComments,
-          engineerDecision: form.engineerDecision,
-        }),
+        body: JSON.stringify(payload),
       });
+
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || data.message || "Submission failed");
@@ -137,13 +165,20 @@ export default function InspectionForm({ onSuccess }: InspectionFormProps) {
               </div>
             </div>
           </div>
-          <h2 className="text-2xl font-black text-white mb-2">Report Submitted!</h2>
-          <p className="text-stone-400 text-sm mb-8">Your inspection report has been recorded successfully.</p>
+          <h2 className="text-2xl font-black text-white mb-2">
+            {isEditing ? "Report Updated!" : "Report Submitted!"}
+          </h2>
+          <p className="text-stone-400 text-sm mb-8">
+            {isEditing 
+              ? "Your inspection report has been updated successfully."
+              : "Your inspection report has been recorded successfully."
+            }
+          </p>
           <button
             onClick={resetForm}
             className="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-stone-900 font-bold rounded-xl transition-all"
           >
-            Submit Another Report
+            {isEditing ? "Close" : "Submit Another Report"}
           </button>
         </div>
       </div>
@@ -424,14 +459,14 @@ export default function InspectionForm({ onSuccess }: InspectionFormProps) {
         {submitting ? (
           <>
             <div className="w-4 h-4 border-2 border-stone-900/30 border-t-stone-900 rounded-full animate-spin" />
-            Submitting...
+            {isEditing ? "Updating..." : "Submitting..."}
           </>
         ) : (
           <>
             <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
-            Submit Report
+            {isEditing ? "Update Report" : "Submit Report"}
           </>
         )}
       </button>
