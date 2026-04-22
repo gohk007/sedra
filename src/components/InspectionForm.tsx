@@ -37,6 +37,8 @@ export default function InspectionForm({ onSuccess }: InspectionFormProps) {
     department: "",
     departmentOther: "",
     remarks: "",
+    engineerComments: "",
+    engineerDecision: "",
     wirFile: null as File | null,
   });
 
@@ -85,6 +87,8 @@ export default function InspectionForm({ onSuccess }: InspectionFormProps) {
           statusOfInspection: form.statusOfInspection,
           department: form.department === "Other" ? form.departmentOther : form.department,
           remarks: form.remarks,
+          engineerComments: form.engineerComments,
+          engineerDecision: form.engineerDecision,
         }),
       });
       if (!res.ok) {
@@ -113,6 +117,8 @@ export default function InspectionForm({ onSuccess }: InspectionFormProps) {
       department: "",
       departmentOther: "",
       remarks: "",
+      engineerComments: "",
+      engineerDecision: "",
       wirFile: null,
     });
   };
@@ -311,6 +317,38 @@ export default function InspectionForm({ onSuccess }: InspectionFormProps) {
               placeholder="Add any notes or observations about the inspection..."
               value={form.remarks}
               onChange={(e) => set("remarks", e.target.value)}
+              className="w-full px-4 py-3 bg-stone-800 border border-stone-700 text-white placeholder-stone-500 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all text-sm resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-stone-300 text-sm font-medium mb-3">
+              Engineer's Final Decision <span className="text-stone-600 font-normal">(optional)</span>
+            </label>
+            <div className="space-y-2">
+              {["Approved", "Approved with Comments", "Revise & Resubmit", "Rejected"].map((option) => (
+                <label key={option} className="flex items-center gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={form.engineerDecision === option}
+                    onChange={(e) => set("engineerDecision", e.target.checked ? option : "")}
+                    className="w-5 h-5 rounded border border-stone-600 bg-stone-800 text-amber-500 focus:ring-2 focus:ring-amber-500 cursor-pointer accent-amber-500"
+                  />
+                  <span className="text-stone-300 text-sm group-hover:text-amber-400 transition-colors">{option}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-stone-300 text-sm font-medium mb-2">
+              Additional Comments <span className="text-stone-600 font-normal">(optional)</span>
+            </label>
+            <textarea
+              rows={3}
+              placeholder="Add any additional comments or notes about the decision..."
+              value={form.engineerComments}
+              onChange={(e) => set("engineerComments", e.target.value)}
               className="w-full px-4 py-3 bg-stone-800 border border-stone-700 text-white placeholder-stone-500 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all text-sm resize-none"
             />
           </div>

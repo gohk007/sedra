@@ -37,6 +37,8 @@ model Inspection {
   statusOfInspection String
   remarks           String   @db.Text
   department        String
+  engineerComments  String?  @db.Text
+  engineerDecision  String?  // "Approved", "Approved with Comments", "Revise & Resubmit", "Rejected"
   
   // File attachment
   wirAttachmentUrl  String?

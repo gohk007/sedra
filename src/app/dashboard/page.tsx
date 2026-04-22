@@ -18,6 +18,8 @@ interface Inspection {
   statusOfInspection: string;
   remarks: string;
   department: string;
+  engineerDecision?: string;
+  engineerComments?: string;
 }
 
 const statusColors: Record<string, string> = {
@@ -34,6 +36,7 @@ export default function Dashboard() {
   const [inspections, setInspections] = useState<Inspection[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) router.push("/signin");
@@ -126,16 +129,24 @@ export default function Dashboard() {
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-stone-950 border-r border-stone-800">
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-stone-800">
-        <div className="w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30 flex-shrink-0">
-          <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-stone-900">
-            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
+      <div className="flex items-center justify-between px-6 py-5 border-b border-stone-800">
+        <div className="flex items-center gap-3">
+          <div className="p-1.5 bg-amber-500/20 rounded-xl border border-amber-500/40">
+            <img src="/logo.jpeg" alt="Sedra Logo" className="w-12 h-12 rounded-lg object-cover" />
+          </div>
+          <div>
+            <p className="text-white font-bold text-lg leading-none">Sedra</p>
+            <p className="text-stone-600 text-xs mt-0.5">Inspection Platform</p>
+          </div>
+        </div>
+        <button
+          onClick={() => { setDesktopSidebarOpen(false); setSidebarOpen(false); }}
+          className="text-stone-500 hover:text-stone-300 transition-colors lg:hidden"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
-        </div>
-        <div>
-          <p className="text-white font-bold text-lg leading-none">Sedra</p>
-          <p className="text-stone-600 text-xs mt-0.5">Inspection Platform</p>
-        </div>
+        </button>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">
@@ -185,7 +196,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-stone-950 flex">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 z-30">
+      <aside className={`hidden lg:flex lg:flex-col lg:fixed lg:left-0 lg:top-0 lg:bottom-0 lg:z-30 bg-stone-950 transition-all duration-300 ${desktopSidebarOpen ? "lg:w-64" : "lg:w-0 lg:overflow-hidden"}`}>
         <SidebarContent />
       </aside>
 
@@ -200,7 +211,7 @@ export default function Dashboard() {
       )}
 
       {/* Main content */}
-      <div className="flex-1 lg:pl-64 flex flex-col min-h-screen">
+      <div className={`flex-1 flex flex-col min-h-screen overflow-x-hidden transition-all duration-300 ${desktopSidebarOpen ? "lg:ml-64" : "lg:ml-0"}`}>
         <header className="sticky top-0 z-20 bg-stone-950/90 backdrop-blur-sm border-b border-stone-800 px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
@@ -209,6 +220,14 @@ export default function Dashboard() {
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setDesktopSidebarOpen(!desktopSidebarOpen)}
+              className="hidden lg:block text-stone-400 hover:text-white transition-colors"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={`w-6 h-6 transition-transform ${desktopSidebarOpen ? "rotate-180" : ""}`}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             <div>
@@ -231,7 +250,7 @@ export default function Dashboard() {
           )}
         </header>
 
-        <main className="flex-1 p-3 sm:p-6">
+        <main className="flex-1 p-3 sm:p-6 overflow-x-hidden w-full">
           {activeTab === "form" ? (
             <InspectionForm onSuccess={handleFormSuccess} />
           ) : isAdmin && activeTab === "users" ? (
@@ -364,11 +383,11 @@ function UserView({
             <p className="text-stone-600 text-sm mt-1">Submit your first inspection to see it here</p>
           </div>
         ) : (
-          <div className="overflow-x-auto scrollbar-thin">
-            <table className="w-full text-sm min-w-full">
+          <div className="overflow-hidden">
+            <table className="w-full text-sm">
               <thead>
                 <tr className="bg-stone-800/40">
-                  {["#", "Date", "CHEC Inspector", "Villa", "Activity", "Status", "Dept"].map((h) => (
+                  {["#", "Date", "CHEC Inspector", "Villa", "Activity", "Status", "Decision", "Notes", "Dept"].map((h) => (
                     <th key={h} className={`px-2 sm:px-4 py-2.5 sm:py-3.5 text-left text-stone-500 text-xs font-medium uppercase tracking-wider whitespace-nowrap ${
                       (h === "CHEC Inspector" || h === "Activity" || h === "Dept") ? "hidden sm:table-cell" : ""
                     }`}>{h}</th>
@@ -379,7 +398,7 @@ function UserView({
                 {inspections.map((item) => (
                   <tr key={item.id} className="hover:bg-stone-800/30 transition-colors">
                     <td className="px-2 sm:px-4 py-2.5 sm:py-4 text-amber-400 font-mono font-semibold whitespace-nowrap text-xs sm:text-sm">#{item.serialNumber}</td>
-                    <td className="px-2 sm:px-4 py-2.5 sm:py-4 text-stone-300 whitespace-nowrap text-xs sm:text-sm">{new Date(item.dateTime).toLocaleDateString()}</td>
+                    <td className="px-1 sm:px-2 py-2.5 sm:py-4 text-stone-300 whitespace-nowrap text-xs">{new Date(item.dateTime).toLocaleDateString()}</td>
                     <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-4 text-white font-medium whitespace-nowrap">{item.checInspectorName}</td>
                     <td className="px-2 sm:px-4 py-2.5 sm:py-4 whitespace-nowrap text-xs sm:text-sm">
                       <span className="text-white font-medium">#{item.villaNumber}</span>
@@ -390,6 +409,34 @@ function UserView({
                       <span className={`px-2.5 py-1 rounded-lg border text-xs font-medium ${statusColors[item.statusOfInspection] || "bg-stone-700 text-stone-300 border-stone-600"}`}>
                         {item.statusOfInspection}
                       </span>
+                    </td>
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-4 text-xs whitespace-nowrap">
+                      {item.engineerDecision ? (
+                        <span className={`px-2 py-1 rounded-lg font-medium ${
+                          item.engineerDecision === "Approved" ? "bg-green-500/20 text-green-400" :
+                          item.engineerDecision === "Approved with Comments" ? "bg-blue-500/20 text-blue-400" :
+                          item.engineerDecision === "Revise & Resubmit" ? "bg-yellow-500/20 text-yellow-400" :
+                          "bg-red-500/20 text-red-400"
+                        }`}>
+                          {item.engineerDecision}
+                        </span>
+                      ) : (
+                        <span className="text-stone-600">—</span>
+                      )}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-4 text-xs">
+                      {item.engineerComments ? (
+                        <div className="relative group">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-stone-800 rounded-lg border border-stone-700 text-amber-400 cursor-help">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M18 10.172A6 6 0 00-2 10V3.172a6 6 0 0020 0V10z"/></svg>
+                          </span>
+                          <div className="hidden group-hover:block absolute left-0 bottom-full mb-2 bg-stone-950 border border-stone-700 rounded-lg p-3 text-stone-300 text-sm max-w-xs z-10 whitespace-normal shadow-lg">
+                            {item.engineerComments}
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-stone-600">—</span>
+                      )}
                     </td>
                     <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-4 text-stone-400 whitespace-nowrap text-xs">{item.department}</td>
                   </tr>

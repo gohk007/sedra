@@ -230,7 +230,7 @@ export default function AdminPanel({
       }
 
       const rows = [
-        ["Serial #","Date","CHEC Inspector","ECEC Inspector","Villa Type","Villa Number","Activity Type","Status","Remarks","Department","Submitted By (Email)","Submitted By (Phone)"].join(","),
+        ["Serial #","Date","CHEC Inspector","ECEC Inspector","Villa Type","Villa Number","Activity Type","Status","Remarks","Department","Engineer Decision","Engineer Comments","Submitted By (Email)","Submitted By (Phone)"].join(","),
         ...toFilter.map((r: any) => [
           r.serialNumber,
           new Date(r.dateTime).toLocaleDateString("en-GB"),
@@ -242,6 +242,8 @@ export default function AdminPanel({
           r.statusOfInspection,
           `"${(r.remarks || "").replace(/"/g, '""')}"`,
           r.department,
+          r.engineerDecision ?? "",
+          `"${(r.engineerComments || "").replace(/"/g, '""')}"`,
           r.user?.email ?? "",
           r.user?.phone ?? "",
         ].join(","))
@@ -448,11 +450,11 @@ export default function AdminPanel({
             <p className="text-stone-600 text-sm mt-1">Try adjusting your filters</p>
           </div>
         ) : (
-          <div className="overflow-x-auto scrollbar-thin">
-            <table className="w-full text-sm min-w-full">
+          <div className="overflow-hidden">
+            <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-stone-800">
-                  {["#", "Date", "CHEC Inspector", "ECEC Inspector", "Villa", "Activity", "Status", "Department", "Submitted By"].map((h) => (
+                  {["#", "Date", "CHEC Inspector", "ECEC Inspector", "Villa", "Activity", "Status", "Department", "Decision", "Notes", "Submitted By"].map((h) => (
                     <th key={h} className={`px-2 sm:px-4 py-2.5 sm:py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wide whitespace-nowrap ${
                       (h === "CHEC Inspector" || h === "ECEC Inspector" || h === "Activity" || h === "Department" || h === "Submitted By") ? "hidden sm:table-cell" : ""
                     }`}>{h}</th>
@@ -469,11 +471,39 @@ export default function AdminPanel({
                     <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap text-xs sm:text-sm">{inspection.villaType} #{inspection.villaNumber}</td>
                     <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap">{inspection.activityType}</td>
                     <td className="px-2 sm:px-4 py-2.5 sm:py-3">
-                      <span className={`px-2 py-1 rounded-lg text-xs font-medium ${statusColors[inspection.statusOfInspection] ?? "bg-stone-700 text-stone-300 border border-stone-600"}`}>
+                      <span className={`px-2.5 py-1 rounded-lg text-xs font-medium inline-block ${statusColors[inspection.statusOfInspection] ?? "bg-stone-700 text-stone-300 border border-stone-600"}`}>
                         {inspection.statusOfInspection}
                       </span>
                     </td>
                     <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap">{inspection.department}</td>
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-xs whitespace-nowrap">
+                      {inspection.engineerDecision ? (
+                        <span className={`px-2 py-1 rounded-lg font-medium ${
+                          inspection.engineerDecision === "Approved" ? "bg-green-500/20 text-green-400" :
+                          inspection.engineerDecision === "Approved with Comments" ? "bg-blue-500/20 text-blue-400" :
+                          inspection.engineerDecision === "Revise & Resubmit" ? "bg-yellow-500/20 text-yellow-400" :
+                          "bg-red-500/20 text-red-400"
+                        }`}>
+                          {inspection.engineerDecision}
+                        </span>
+                      ) : (
+                        <span className="text-stone-600">—</span>
+                      )}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-xs">
+                      {inspection.engineerComments ? (
+                        <div className="relative group">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-stone-800 rounded-lg border border-stone-700 text-amber-400 cursor-help">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M18 10.172A6 6 0 00-2 10V3.172a6 6 0 0020 0V10z"/></svg>
+                          </span>
+                          <div className="hidden group-hover:block absolute left-0 bottom-full mb-2 bg-stone-950 border border-stone-700 rounded-lg p-3 text-stone-300 text-sm max-w-xs z-10 whitespace-normal shadow-lg">
+                            {inspection.engineerComments}
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-stone-600">—</span>
+                      )}
+                    </td>
                     <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap text-xs">{inspection.user?.email}</td>
                   </tr>
                 ))}

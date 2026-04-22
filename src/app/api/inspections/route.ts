@@ -12,6 +12,8 @@ const inspectionSchema = z.object({
   statusOfInspection: z.string(),
   remarks: z.string(),
   department: z.string(),
+  engineerComments: z.string().optional(),
+  engineerDecision: z.string().optional(),
   wirAttachmentUrl: z.string().optional(),
   wirAttachmentName: z.string().optional(),
 });

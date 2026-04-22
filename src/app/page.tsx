@@ -30,10 +30,8 @@ export default function Home() {
       {/* Navigation */}
       <nav className="relative z-10 flex items-center justify-between px-8 py-5 border-b border-stone-800">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-amber-500 rounded-lg flex items-center justify-center">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-stone-900">
-              <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
-            </svg>
+          <div className="p-1.5 bg-amber-500/20 rounded-xl border border-amber-500/40">
+            <img src="/logo.jpeg" alt="Sedra Logo" className="w-12 h-12 rounded-lg object-cover" />
           </div>
           <span className="text-white font-bold text-xl tracking-tight">Sedra</span>
         </div>
