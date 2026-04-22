@@ -452,74 +452,145 @@ export default function AdminPanel({
             <p className="text-stone-600 text-sm mt-1">Try adjusting your filters</p>
           </div>
         ) : (
-          <div className="overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-stone-800">
-                  {["#", "Date", "CHEC Inspector", "ECEC Inspector", "Villa", "Activity", "Status", "Department", "Decision", "Notes", "Submitted By", "Action"].map((h) => (
-                    <th key={h} className={`px-2 sm:px-4 py-2.5 sm:py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wide whitespace-nowrap ${
-                      (h === "CHEC Inspector" || h === "ECEC Inspector" || h === "Activity" || h === "Department" || h === "Submitted By") ? "hidden sm:table-cell" : ""
-                    }`}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-stone-800">
-                {filteredInspections.map((inspection: any) => (
-                  <tr key={inspection.id} className="hover:bg-stone-800/50 transition-colors">
-                    <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-stone-300 font-medium">{inspection.serialNumber}</td>
-                    <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap text-xs sm:text-sm">{new Date(inspection.dateTime).toLocaleDateString("en-GB")}</td>
-                    <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-300 whitespace-nowrap">{inspection.checInspectorName}</td>
-                    <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-300 whitespace-nowrap">{inspection.ececInspectorName}</td>
-                    <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap text-xs sm:text-sm">{inspection.villaType} #{inspection.villaNumber}</td>
-                    <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap">{inspection.activityType}</td>
-                    <td className="px-2 sm:px-4 py-2.5 sm:py-3">
-                      <span className={`px-2.5 py-1 rounded-lg text-xs font-medium inline-block ${statusColors[inspection.statusOfInspection] ?? "bg-stone-700 text-stone-300 border border-stone-600"}`}>
-                        {inspection.statusOfInspection}
-                      </span>
-                    </td>
-                    <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap">{inspection.department}</td>
-                    <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-xs whitespace-nowrap">
-                      {inspection.engineerDecision ? (
-                        <span className={`px-2 py-1 rounded-lg font-medium ${
-                          inspection.engineerDecision === "Approved" ? "bg-green-500/20 text-green-400" :
-                          inspection.engineerDecision === "Approved with Comments" ? "bg-blue-500/20 text-blue-400" :
-                          inspection.engineerDecision === "Revise & Resubmit" ? "bg-yellow-500/20 text-yellow-400" :
-                          "bg-red-500/20 text-red-400"
+          <>
+            {/* Mobile Card View */}
+            <div className="sm:hidden space-y-3">
+              {filteredInspections.map((inspection: any) => (
+                <div key={inspection.id} className="bg-stone-800 border border-stone-700 rounded-xl p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-xs text-stone-500 font-medium">Report #{inspection.serialNumber}</p>
+                      <p className="text-sm font-semibold text-white mt-0.5">Villa {inspection.villaType} #{inspection.villaNumber}</p>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-lg text-xs font-medium flex-shrink-0 ${statusColors[inspection.statusOfInspection] ?? "bg-stone-700 text-stone-300 border border-stone-600"}`}>
+                      {inspection.statusOfInspection}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2 text-xs border-t border-stone-700 pt-3">
+                    <div className="flex justify-between">
+                      <span className="text-stone-500">Date:</span>
+                      <span className="text-stone-200">{new Date(inspection.dateTime).toLocaleDateString("en-GB")}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-stone-500">CHEC Inspector:</span>
+                      <span className="text-stone-200 text-right">{inspection.checInspectorName}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-stone-500">ECEC Inspector:</span>
+                      <span className="text-stone-200 text-right">{inspection.ececInspectorName}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-stone-500">Activity:</span>
+                      <span className="text-stone-200 text-right">{inspection.activityType}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-stone-500">Department:</span>
+                      <span className="text-stone-200 text-right">{inspection.department}</span>
+                    </div>
+                    {inspection.engineerDecision && (
+                      <div className="flex justify-between">
+                        <span className="text-stone-500">Decision:</span>
+                        <span className={`text-right text-xs font-medium ${
+                          inspection.engineerDecision === "Approved" ? "text-green-400" :
+                          inspection.engineerDecision === "Approved with Comments" ? "text-blue-400" :
+                          inspection.engineerDecision === "Revise & Resubmit" ? "text-yellow-400" :
+                          "text-red-400"
                         }`}>
                           {inspection.engineerDecision}
                         </span>
-                      ) : (
-                        <span className="text-stone-600">—</span>
-                      )}
-                    </td>
-                    <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-xs">
-                      {inspection.engineerComments ? (
-                        <div className="relative group">
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-stone-800 rounded-lg border border-stone-700 text-amber-400 cursor-help">
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M18 10.172A6 6 0 00-2 10V3.172a6 6 0 0020 0V10z"/></svg>
-                          </span>
-                          <div className="hidden group-hover:block absolute left-0 bottom-full mb-2 bg-stone-950 border border-stone-700 rounded-lg p-3 text-stone-300 text-sm max-w-xs z-10 whitespace-normal shadow-lg">
-                            {inspection.engineerComments}
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="text-stone-600">—</span>
-                      )}
-                    </td>
-                    <td className="hidden sm:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap text-xs">{inspection.user?.email}</td>
-                    <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-xs whitespace-nowrap">
-                      <button
-                        onClick={() => onEditInspection?.(inspection)}
-                        className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 rounded-lg transition-colors text-xs font-medium"
-                      >
-                        Edit
-                      </button>
-                    </td>
+                      </div>
+                    )}
+                    {inspection.engineerComments && (
+                      <div className="pt-2 border-t border-stone-700">
+                        <p className="text-stone-500 mb-1">Comments:</p>
+                        <p className="text-stone-300 text-xs italic">{inspection.engineerComments}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2 pt-2 border-t border-stone-700">
+                    <button
+                      onClick={() => onEditInspection?.(inspection)}
+                      className="flex-1 px-3 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 rounded-lg transition-colors text-xs font-medium"
+                    >
+                      Edit Report
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-stone-800">
+                    {["#", "Date", "CHEC Inspector", "ECEC Inspector", "Villa", "Activity", "Status", "Department", "Decision", "Notes", "Submitted By", "Action"].map((h) => (
+                      <th key={h} className={`px-2 sm:px-4 py-2.5 sm:py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wide whitespace-nowrap ${
+                        (h === "CHEC Inspector" || h === "ECEC Inspector" || h === "Activity" || h === "Department" || h === "Submitted By") ? "hidden lg:table-cell" : ""
+                      }`}>{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-stone-800">
+                  {filteredInspections.map((inspection: any) => (
+                    <tr key={inspection.id} className="hover:bg-stone-800/50 transition-colors">
+                      <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-stone-300 font-medium">{inspection.serialNumber}</td>
+                      <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap text-xs sm:text-sm">{new Date(inspection.dateTime).toLocaleDateString("en-GB")}</td>
+                      <td className="hidden lg:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-300 whitespace-nowrap">{inspection.checInspectorName}</td>
+                      <td className="hidden lg:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-300 whitespace-nowrap">{inspection.ececInspectorName}</td>
+                      <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap text-xs sm:text-sm">{inspection.villaType} #{inspection.villaNumber}</td>
+                      <td className="hidden lg:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap">{inspection.activityType}</td>
+                      <td className="px-2 sm:px-4 py-2.5 sm:py-3">
+                        <span className={`px-2.5 py-1 rounded-lg text-xs font-medium inline-block ${statusColors[inspection.statusOfInspection] ?? "bg-stone-700 text-stone-300 border border-stone-600"}`}>
+                          {inspection.statusOfInspection}
+                        </span>
+                      </td>
+                      <td className="hidden lg:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap">{inspection.department}</td>
+                      <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-xs whitespace-nowrap">
+                        {inspection.engineerDecision ? (
+                          <span className={`px-2 py-1 rounded-lg font-medium ${
+                            inspection.engineerDecision === "Approved" ? "bg-green-500/20 text-green-400" :
+                            inspection.engineerDecision === "Approved with Comments" ? "bg-blue-500/20 text-blue-400" :
+                            inspection.engineerDecision === "Revise & Resubmit" ? "bg-yellow-500/20 text-yellow-400" :
+                            "bg-red-500/20 text-red-400"
+                          }`}>
+                            {inspection.engineerDecision}
+                          </span>
+                        ) : (
+                          <span className="text-stone-600">—</span>
+                        )}
+                      </td>
+                      <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-xs">
+                        {inspection.engineerComments ? (
+                          <div className="relative group">
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-stone-800 rounded-lg border border-stone-700 text-amber-400 cursor-help">
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M18 10.172A6 6 0 00-2 10V3.172a6 6 0 0020 0V10z"/></svg>
+                            </span>
+                            <div className="hidden group-hover:block absolute left-0 bottom-full mb-2 bg-stone-950 border border-stone-700 rounded-lg p-3 text-stone-300 text-sm max-w-xs z-10 whitespace-normal shadow-lg">
+                              {inspection.engineerComments}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-stone-600">—</span>
+                        )}
+                      </td>
+                      <td className="hidden lg:table-cell px-2 sm:px-4 py-2.5 sm:py-3 text-stone-400 whitespace-nowrap text-xs">{inspection.user?.email}</td>
+                      <td className="px-2 sm:px-4 py-2.5 sm:py-3 text-xs whitespace-nowrap">
+                        <button
+                          onClick={() => onEditInspection?.(inspection)}
+                          className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 rounded-lg transition-colors text-xs font-medium"
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>
