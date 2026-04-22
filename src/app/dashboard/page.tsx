@@ -13,7 +13,7 @@ interface Inspection {
   checInspectorName: string;
   ececInspectorName: string;
   villaType: string;
-  villaNumber: string;
+  villaNumber: number;
   activityType: string;
   statusOfInspection: string;
   remarks: string;
